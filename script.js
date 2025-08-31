@@ -60,45 +60,80 @@ let txt="<tr><th>Region</th><th>SNP</th><th>Alba</th><th>Green</th><th>Labour</t
   }
   return txt;
 }
+// =========================display the constituency seats and regional list votes ================================
 document.getElementById("const-seats").innerHTML = createVoteTable(constituencyAndList, "constSeats"); // display constituency results
 
 document.getElementById("list-seats").innerHTML = createVoteTable(constituencyAndList, "listVotes"); // display regional list votes
 
 const parties = ["SNP", "Alba", "Green", "Labour", "Cons", "Libdem"];
 const centralListVotes = constituencyAndList[0].listVotes; //copy regional list votes for Central Scotland into a new array
-const centralConstVotes = constituencyAndList[0].constSeats; // is this needed?
+const listVotesWon = [0, 0, 0, 0, 0, 0];
+const centralConstVotes = constituencyAndList[0].constSeats; // copy constituency seat count into a new array
+const line3Desc = "List seats won";
+
 let tableLine2 = "<td>Constituency Seats</td>"; //set up content of table for D'Hondt demonstration
 for (const i of constituencyAndList[0].constSeats) {
   tableLine2 += `<td>${i}</td>`;// set up table data entries for constituency results
 }
+tableLine2 += "<td></td>";
 document.getElementById("const-won").innerHTML = tableLine2; // fixed content so this can be displayed just once
 let tableLine4 = "<td>Votes cast</td>"; // construct
 for (const k of constituencyAndList[0].listVotes) {
   tableLine4 += `<td>${k}`;
-}
+};
+tableLine4 += "<td></td>";
 document.getElementById("votes-cast").innerHTML = tableLine4;
 let currentRound = 0;
+
 function dHondtReset() {
   currentRound = 0;
-  let tableLine3 = `<td>List seats won</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>` // reset list seats won to all blank
+  for (const listArray in listVotesWon) {
+    listVotesWon[listArray] = 0;
+  }
+  let tableLine3 = `<td>${line3Desc}</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td></td>` // reset list seats won to all blank
   document.getElementById("list-won").innerHTML = tableLine3;
   for (let j=1; j<=7; j++) {
     document.getElementById(`round${j}`).innerHTML =
     `<td>-</td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td>`; // clear rounds lines
   }
-  document.getElementById("round-btn").innerHTML = "start";
+  document.getElementById("round-btn").innerHTML = "Start";
 }
 const dHondt = document.getElementById("round-btn");
 dHondt.addEventListener("click", nextDHondtRound);
 
 dHondtReset();
+
 function nextDHondtRound() {
   currentRound++;
+  let dHontArray;
   let text = `<td>Round ${currentRound}</td>`
   if (currentRound === 8) {
     dHondtReset();
   } else {
+    dHontArray = centralListVotes.map(function(votes, inx){
+      return Math.round(votes/(centralConstVotes[inx]+listVotesWon[inx]+1));
+    });
+    let max = dHontArray[0];
+    let maxInx = 0;
+    for (let party in dHontArray) {
+      if (dHontArray[party] >max) {
+        max = dHontArray[party];
+        maxInx = party;
+      }
+    };
+    for (party of dHontArray) {
+      text += `<td>${party}</td>`
+    }
+    text += `<td>${parties[maxInx]}</td>`
     document.getElementById(`round${currentRound}`).innerHTML = text;
+    text = `<td>${line3Desc}</td>`;
+    listVotesWon[maxInx]++;
+    for (party of listVotesWon) {
+      text += `<td>${party}</td>`
+    };
+    text += "<td></td>";
+    document.getElementById("list-won").innerHTML = text;
+    document.getElementById("round-btn").innerHTML = (currentRound === 7)? "Reset": "Next";
   }
 
 }
