@@ -10,9 +10,11 @@ td, th {
 }
 td {
   color: blue;
+  text-align: right;
 }
 tr :first-child {
   border-left:none;
+  text-align: left;
 }
 th {
   border-bottom: 1px solid blue;

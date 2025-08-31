@@ -124,7 +124,7 @@ function nextDHondtRound() {
     for (party of dHontArray) {
       text += `<td>${party}</td>`
     }
-    text += `<td>${parties[maxInx]}</td>`
+    text += `<td style="text-align: left">${parties[maxInx]}</td>`
     document.getElementById(`round${currentRound}`).innerHTML = text;
     text = `<td>${line3Desc}</td>`;
     listVotesWon[maxInx]++;
