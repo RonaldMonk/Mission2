@@ -1,48 +1,53 @@
 const constituencyAndList = [ // Array for each region
   {
-    "region": "Central Scotland",
-    "constSeats": [9, 0, 0, 0, 0, 0], //Constituency seats won by each party in the order SNP, Alba, Green, Labour, Conservative and Liberal democrats
-    "listVotes": [148399, 5345, 19512, 77623, 59896, 6337] //regional list votes in the same order as constituency seats
+    region: "Central Scotland",
+    constSeats: [9, 0, 0, 0, 0, 0], //Constituency seats won by each party in the order SNP, Alba, Green, Labour, Conservative and Liberal democrats
+    listVotes: [148399, 5345, 19512, 77623, 59896, 6337] //regional list votes in the same order as constituency seats
   },
   {
-    "region": "Glasgow",
-    "constSeats": [9, 0, 0, 0, 0, 0],
-    "listVotes": [147091, 7820, 50364, 70942, 33758, 9523]
+    region: "Glasgow",
+    constSeats: [9, 0, 0, 0, 0, 0],
+    listVotes: [147091, 7820, 50364, 70942, 33758, 9523]
   },
   {
-    "region": "Highlands and Islands",
-    "constSeats": [6, 0, 0, 0, 0, 2],
-    "listVotes": [96433, 3828, 6788, 22713, 60779, 26771]
+    region: "Highlands and Islands",
+    constSeats: [6, 0, 0, 0, 0, 2],
+    listVotes: [96433, 3828, 6788, 22713, 60779, 26771]
   },
   {
-    "region": "Lothian",
-    "constSeats": [7, 0, 0, 1, 0, 1],
-    "listVotes": [163022, 14973, 43936, 80518, 50678, 27160]
+    region: "Lothian",
+    constSeats: [7, 0, 0, 1, 0, 1],
+    listVotes: [163022, 14973, 43936, 80518, 50678, 27160]
   },
   {
-    "region": "Mid Scotland and Fife",
-    "constSeats": [8, 0, 0, 0, 0, 1],
-    "listVotes": [121094, 7064, 29996, 59077, 75061, 19911]
+    region: "Mid Scotland and Fife",
+    constSeats: [8, 0, 0, 0, 0, 1],
+    listVotes: [121094, 7064, 29996, 59077, 75061, 19911]
   },
   {
-    "region": "North East Scotland",
-    "constSeats": [9, 0, 0, 0, 1, 0],
-    "listVotes": [158145, 10235, 34565, 69861, 80787, 24025]
+    region: "North East Scotland",
+    constSeats: [9, 0, 0, 0, 1, 0],
+    listVotes: [158145, 10235, 34565, 69861, 80787, 24025]
   },
   {
-    "region": "South Scotland",
-    "constSeats": [6, 0, 0, 0, 3, 0],
-    "listVotes": [133526, 8572, 28931, 60185, 84028, 22529]
+    region: "South Scotland",
+    constSeats: [6, 0, 0, 0, 3, 0],
+    listVotes: [133526, 8572, 28931, 60185, 84028, 22529]
   },
   {
-    "region": "West Scotland",
-    "constSeats": [8, 0, 0, 1, 1, 0],
-    "listVotes": [147689, 10914, 28281, 71024, 63173, 19465]
+    region: "West Scotland",
+    constSeats: [8, 0, 0, 1, 1, 0],
+    listVotes: [147689, 10914, 28281, 71024, 63173, 19465]
   }
 ];
-
+const parties = ["SNP", "Alba", "Green", "Labour", "Cons", "Libdem"];
+let partiesCells = "";
+for (const partyName of parties) {
+  partiesCells += `<th>${partyName}</th>`; // make a line of cells with party names in each cell
+}
 function createVoteTable(voteArray, seatsVotes){ //Create a table to display votes per region
-let txt="<tr><th>Region</th><th>SNP</th><th>Alba</th><th>Green</th><th>Labour</th><th>Cons</th><th>Libdem</th></tr>"; // Headings for first row
+  let txt = `<tr><th>Region</th>${partiesCells}</tr>`;
+    //let txt="<tr><th>Region</th><th>SNP</th><th>Alba</th><th>Green</th><th>Labour</th><th>Cons</th><th>Libdem</th></tr>"; // Headings for first row
   for (const region of voteArray) { // for each region...
     txt +=`<tr><td>${region["region"]}</td>`; // Make a table entry for the name of the region
     for (const voteList of region[seatsVotes]) { // for each party...
@@ -57,12 +62,12 @@ document.getElementById("const-seats").innerHTML = createVoteTable(constituencyA
 
 document.getElementById("list-seats").innerHTML = createVoteTable(constituencyAndList, "listVotes"); // display regional list votes
 
-const parties = ["SNP", "Alba", "Green", "Labour", "Cons", "Libdem"];
 const centralListVotes = constituencyAndList[0].listVotes; //copy regional list votes for Central Scotland into a less wordy new array
 const listSeatsWon = [0, 0, 0, 0, 0, 0];
 const centralConstVotes = constituencyAndList[0].constSeats; // copy constituency seat count into a less wordy new array
 const line3Desc = "List seats won";
-
+let tableLine1 = `<th>Central Scotland</th>${partiesCells}</th><th>Winner of round</th>`;
+document.getElementById("table3-headings").innerHTML = tableLine1;
 let tableLine2 = "<td>Constituency Seats</td>"; //set up content of table for D'Hondt demonstration (line 1 is in html)
 for (const i of centralConstVotes) {
   tableLine2 += `<td>${i}</td>`;// set up table data entries for constituency results
@@ -120,7 +125,7 @@ function nextDHondtRound() {
     text += `<td style="text-align: left">${parties[maxInx]}</td>` // override style to make winning party string left aligned
     document.getElementById(`round${currentRound}`).innerHTML = text; // and append to the table
     text = `<td>${line3Desc}</td>`; // set up row for updated regional list seats
-    listSeatsWon[maxInx]++;
+    listSeatsWon[maxInx]++; // increment regional list seats of round winner
     for (party of listSeatsWon) {
       text += `<td>${party}</td>` // collect party seats won into a string
     };
