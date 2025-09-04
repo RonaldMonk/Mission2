@@ -30,3 +30,13 @@ button {
   padding: 5px 10px;
   background-color: aqua;
 }
+div {
+  float: left;
+  margin-right: 20px;
+}
+#dhondt-round {
+  width: 250px;
+}
+#current-region {
+  width: 300px;
+}

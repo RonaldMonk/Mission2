@@ -40,6 +40,7 @@ const constituencyAndList = [ // Array for each region
     listVotes: [147689, 10914, 28281, 71024, 63173, 19465]
   }
 ];
+
 const parties = ["SNP", "Alba", "Green", "Labour", "Cons", "Libdem"];
 let partiesCells = "";
 for (const partyName of parties) {
@@ -61,35 +62,37 @@ function createVoteTable(voteArray, seatsVotes){ //Create a table to display vot
 document.getElementById("const-seats").innerHTML = createVoteTable(constituencyAndList, "constSeats"); // display constituency results
 
 document.getElementById("list-seats").innerHTML = createVoteTable(constituencyAndList, "listVotes"); // display regional list votes
-
-const centralListVotes = constituencyAndList[0].listVotes; //copy regional list votes for Central Scotland into a less wordy new array
+// D'Hondt section=================================================================
+//===================================================================================
 const listSeatsWon = [0, 0, 0, 0, 0, 0];
-const centralConstVotes = constituencyAndList[0].constSeats; // copy constituency seat count into a less wordy new array
 const line3Desc = "List seats won";
-let tableLine1 = `<th>Central Scotland</th>${partiesCells}</th><th>Winner of round</th>`;
-document.getElementById("table3-headings").innerHTML = tableLine1;
-let tableLine2 = "<td>Constituency Seats</td>"; //set up content of table for D'Hondt demonstration (line 1 is in html)
-for (const i of centralConstVotes) {
+
+let currentRound; // used to keep track of which D'Hondt round we're on. No need to initialise as it will be done in reset function
+let currentRegion = 0; // keep track of which region is being worked on
+
+function dHondtReset() { // beginning and reset position of variables to be displayed and controlling variables (which round we're on)
+  currentRound = 0;
+  let tableLine1 = `<th>${constituencyAndList[currentRegion].region}</th>${partiesCells}</th><th>Winner of round</th>`; //table headings
+  document.getElementById("table3-headings").innerHTML = tableLine1;
+  let tableLine2 = "<td>Constituency Seats</td>"; //set up content of table for D'Hondt demonstration
+for (const i of constituencyAndList[currentRegion].constSeats) {
   tableLine2 += `<td>${i}</td>`;// set up table data entries for constituency results
 }
 tableLine2 += "<td></td>";
 document.getElementById("const-won").innerHTML = tableLine2; // fixed content so this can be inserted into the table just once
-let tableLine4 = "<td>List votes cast</td>"; // start constructing 4th line of the table
-for (const k of centralListVotes) {
-  tableLine4 += `<td>${k}`; // add each cell to the table row
-};
-tableLine4 += "<td></td>"; // append an empty cell so that the border works properly
-document.getElementById("votes-cast").innerHTML = tableLine4; // insert row 4 which is fixed and doesn't have to be worried about any more
-
-let currentRound; // used to keep track of which D'Hondt round we're on. No need to initialise as it will be done in reset function
-
-function dHondtReset() { // beginning and reset position of variables to be displayed and controlling variables (which round we're on)
-  currentRound = 0;
-  for (const listArray in listSeatsWon) { // zero out all the regional list..should it be seats, not votes..that could be confusing
+  for (const listArray in listSeatsWon) { // zero out all the regional list
     listSeatsWon[listArray] = 0;
   }
+
   let tableLine3 = `<td>${line3Desc}</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td></td>` // reset list seats won to all zeros
   document.getElementById("list-won").innerHTML = tableLine3; // append list seats line to table
+  let tableLine4 = "<td>List votes cast</td>"; // start constructing 4th line of the table
+  for (const k of constituencyAndList[currentRegion].listVotes) {
+    tableLine4 += `<td>${k}`; // add each cell to the table row
+  };
+  tableLine4 += "<td></td>"; // append an empty cell so that the border works properly
+  document.getElementById("votes-cast").innerHTML = tableLine4; // insert row 4 which is fixed and doesn't have to be worried about any more
+
   for (let j=1; j<=7; j++) {
     document.getElementById(`round${j}`).innerHTML =
     `<td>-</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>`; // clear rounds lines
@@ -98,9 +101,11 @@ function dHondtReset() { // beginning and reset position of variables to be disp
 }
 const dHondt = document.getElementById("round-btn"); // set up listener for Start/Next round/Restart button
 dHondt.addEventListener("click", nextDHondtRound);
+const regionSelect = document.getElementById("current-region");
+region.addEventListener("click", changeRegion);
 
 dHondtReset();
-
+document.getElementById("region").innerHTML = constituencyAndList[currentRegion].region;
 function nextDHondtRound() {
   currentRound++;
   let dHontArray;
@@ -108,8 +113,8 @@ function nextDHondtRound() {
   if (currentRound === 8) {
     dHondtReset();
   } else {
-    dHontArray = centralListVotes.map(function(votes, inx){
-      return Math.round(votes/(centralConstVotes[inx]+listSeatsWon[inx]+1)); // apply the D'Hondt formula to all the party votes
+    dHontArray = constituencyAndList[currentRegion].listVotes.map(function(votes, inx){
+      return Math.round(votes/(constituencyAndList[currentRegion].constSeats[inx]+listSeatsWon[inx]+1)); // apply the D'Hondt formula to all the party votes
     });
     let max = dHontArray[0];
     let maxInx = 0;
@@ -133,5 +138,12 @@ function nextDHondtRound() {
     document.getElementById("list-won").innerHTML = text;
     document.getElementById("round-btn").innerHTML = (currentRound === 7)? "Reset": "Next round"; // If on round 7 changes button text
   }
-
+}
+function changeRegion() {
+  currentRegion++;
+  if (currentRegion > 7) {
+    currentRegion = 0;
+  }
+  document.getElementById("region").innerHTML = constituencyAndList[currentRegion].region;
+    dHondtReset();
 }
