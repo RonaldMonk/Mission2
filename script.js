@@ -1,3 +1,4 @@
+"use strict";
 const constituencyAndList = [ // Array for each region
   {
     region: "Central Scotland",
@@ -40,12 +41,18 @@ const constituencyAndList = [ // Array for each region
     listVotes: [147689, 10914, 28281, 71024, 63173, 19465]
   }
 ];
-
 const parties = ["SNP", "Alba", "Green", "Labour", "Cons", "Libdem"];
 let partiesCells = "";
 for (const partyName of parties) {
   partiesCells += `<th>${partyName}</th>`; // make a line of cells with party names in each cell
 }
+let regionInx;
+let partyInx;
+let workingListVotes = [];
+for (regionInx = 0; regionInx < constituencyAndList.length; regionInx++) {
+  workingListVotes.push([0, 0, 0, 0, 0, 0]);
+}
+
 function createVoteTable(voteArray, seatsVotes){ //Create a table to display votes per region
   let txt = `<tr><th>Region</th>${partiesCells}</tr>`;
     //let txt="<tr><th>Region</th><th>SNP</th><th>Alba</th><th>Green</th><th>Labour</th><th>Cons</th><th>Libdem</th></tr>"; // Headings for first row
@@ -66,20 +73,21 @@ document.getElementById("list-seats").innerHTML = createVoteTable(constituencyAn
 //===================================================================================
 const listSeatsWon = [0, 0, 0, 0, 0, 0];
 const line3Desc = "List seats won";
-
-let currentRound; // used to keep track of which D'Hondt round we're on. No need to initialise as it will be done in reset function
-let currentRegion = 0; // keep track of which region is being worked on
+let currentRound;
+let currentRegion = 0;
+let currentDataset = 1;
+changeDataset();
 
 function dHondtReset() { // beginning and reset position of variables to be displayed and controlling variables (which round we're on)
   currentRound = 0;
   let tableLine1 = `<th>${constituencyAndList[currentRegion].region}</th>${partiesCells}</th><th>Winner of round</th>`; //table headings
   document.getElementById("table3-headings").innerHTML = tableLine1;
   let tableLine2 = "<td>Constituency Seats</td>"; //set up content of table for D'Hondt demonstration
-for (const i of constituencyAndList[currentRegion].constSeats) {
-  tableLine2 += `<td>${i}</td>`;// set up table data entries for constituency results
-}
-tableLine2 += "<td></td>";
-document.getElementById("const-won").innerHTML = tableLine2; // fixed content so this can be inserted into the table just once
+  for (const i of constituencyAndList[currentRegion].constSeats) {
+    tableLine2 += `<td>${i}</td>`;// set up table data entries for constituency results
+  }
+  tableLine2 += "<td></td>";
+  document.getElementById("const-won").innerHTML = tableLine2; // fixed content so this can be inserted into the table just once
   for (const listArray in listSeatsWon) { // zero out all the regional list
     listSeatsWon[listArray] = 0;
   }
@@ -87,9 +95,9 @@ document.getElementById("const-won").innerHTML = tableLine2; // fixed content so
   let tableLine3 = `<td>${line3Desc}</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td></td>` // reset list seats won to all zeros
   document.getElementById("list-won").innerHTML = tableLine3; // append list seats line to table
   let tableLine4 = "<td>List votes cast</td>"; // start constructing 4th line of the table
-  for (const k of constituencyAndList[currentRegion].listVotes) {
-    tableLine4 += `<td>${k}`; // add each cell to the table row
-  };
+  for (const k of workingListVotes[currentRegion]) {
+    tableLine4 += `<td>${k}</td>`; // add each cell to the table row
+  }
   tableLine4 += "<td></td>"; // append an empty cell so that the border works properly
   document.getElementById("votes-cast").innerHTML = tableLine4; // insert row 4 which is fixed and doesn't have to be worried about any more
 
@@ -99,26 +107,30 @@ document.getElementById("const-won").innerHTML = tableLine2; // fixed content so
   }
   document.getElementById("round-btn").innerHTML = "Start"; // set button text for start of D'Hondt run
 }
+
 const dHondt = document.getElementById("round-btn"); // set up listener for Start/Next round/Restart button
 dHondt.addEventListener("click", nextDHondtRound);
 const regionSelect = document.getElementById("current-region");
 region.addEventListener("click", changeRegion);
-
+const datasetSelect = document.getElementById("dataset");
+datasetSelect.addEventListener("click", changeDataset);
 dHondtReset();
 document.getElementById("region").innerHTML = constituencyAndList[currentRegion].region;
+
 function nextDHondtRound() {
   currentRound++;
   let dHontArray;
+  let party;
   let text = `<td>Round ${currentRound}</td>` // start setting up table row for D'Hondt round
   if (currentRound === 8) {
     dHondtReset();
   } else {
-    dHontArray = constituencyAndList[currentRegion].listVotes.map(function(votes, inx){
+    dHontArray = workingListVotes[currentRegion].map(function(votes, inx){
       return Math.round(votes/(constituencyAndList[currentRegion].constSeats[inx]+listSeatsWon[inx]+1)); // apply the D'Hondt formula to all the party votes
     });
     let max = dHontArray[0];
     let maxInx = 0;
-    for (let party in dHontArray) {
+    for (party in dHontArray) {
       if (dHontArray[party] >max) {
         max = dHontArray[party]; // Find the winning party
         maxInx = party; // and save the index
@@ -139,11 +151,31 @@ function nextDHondtRound() {
     document.getElementById("round-btn").innerHTML = (currentRound === 7)? "Reset": "Next round"; // If on round 7 changes button text
   }
 }
+
 function changeRegion() {
   currentRegion++;
   if (currentRegion > 7) {
     currentRegion = 0;
   }
   document.getElementById("region").innerHTML = constituencyAndList[currentRegion].region;
-    dHondtReset();
+  dHondtReset();
+}
+
+function changeDataset() {
+  let temp;
+  currentDataset++;
+  if (currentDataset > 1) currentDataset = 0;
+  for (regionInx = 0; regionInx < constituencyAndList.length; regionInx++) {
+    for (partyInx = 0; partyInx < parties.length; partyInx++) {
+      workingListVotes[regionInx][partyInx] = constituencyAndList[regionInx].listVotes[partyInx];
+    }
+    if (currentDataset === 1) {
+      temp = workingListVotes[regionInx][0]/2;
+      workingListVotes[regionInx][0] = 0;
+      workingListVotes[regionInx][1] += Math.floor(temp);
+      workingListVotes[regionInx][2] += Math.ceil(temp);
+      document.getElementById("dataset").innerHTML = "Alba/Green 50/50"
+    } else document.getElementById("dataset").innerHTML = "2021 results";
+  }
+  dHondtReset();
 }
