@@ -110,9 +110,9 @@ function dHondtReset() { // beginning and reset position of variables to be disp
 
 const dHondt = document.getElementById("round-btn"); // set up listener for Start/Next round/Restart button
 dHondt.addEventListener("click", nextDHondtRound);
-const regionSelect = document.getElementById("current-region");
+const regionSelect = document.getElementById("current-region"); // set up event listener for region button
 region.addEventListener("click", changeRegion);
-const datasetSelect = document.getElementById("dataset");
+const datasetSelect = document.getElementById("dataset"); // event listener for data set button
 datasetSelect.addEventListener("click", changeDataset);
 dHondtReset();
 document.getElementById("region").innerHTML = constituencyAndList[currentRegion].region;
@@ -157,7 +157,7 @@ function changeRegion() {
   if (currentRegion > 7) {
     currentRegion = 0;
   }
-  document.getElementById("region").innerHTML = constituencyAndList[currentRegion].region;
+  document.getElementById("region").innerHTML = constituencyAndList[currentRegion].region; // change text for region button
   dHondtReset();
 }
 
@@ -167,9 +167,9 @@ function changeDataset() {
   if (currentDataset > 1) currentDataset = 0;
   for (regionInx = 0; regionInx < constituencyAndList.length; regionInx++) {
     for (partyInx = 0; partyInx < parties.length; partyInx++) {
-      workingListVotes[regionInx][partyInx] = constituencyAndList[regionInx].listVotes[partyInx];
+      workingListVotes[regionInx][partyInx] = constituencyAndList[regionInx].listVotes[partyInx]; // copy list votes to an array that can be safely altered
     }
-    if (currentDataset === 1) {
+    if (currentDataset === 1) { // i.e. the 50/50 scenario where SNP votes are shared out between Alba and Green parties
       temp = workingListVotes[regionInx][0]/2;
       workingListVotes[regionInx][0] = 0;
       workingListVotes[regionInx][1] += Math.floor(temp);

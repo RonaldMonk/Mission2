@@ -29,6 +29,8 @@ p::first-letter {
 button {
   padding: 5px 10px;
   background-color: aqua;
+  border-radius: 8px;
+  cursor: pointer;
 }
 div {
   float: left;
@@ -42,8 +44,4 @@ div {
 }
 #current-dataset {
   width: 300px;
-}
-button {
-  border-radius: 8px;
-  cursor: pointer;
 }
