@@ -45,3 +45,6 @@ div {
 #current-dataset {
   width: 300px;
 }
+#newline {
+  clear:left;
+}

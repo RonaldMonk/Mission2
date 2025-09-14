@@ -165,16 +165,16 @@ function changeDataset() {
   let temp;
   currentDataset++;
   if (currentDataset > 1) currentDataset = 0;
-  for (regionInx = 0; regionInx < constituencyAndList.length; regionInx++) {
-    for (partyInx = 0; partyInx < parties.length; partyInx++) {
+  for (regionInx = 0; regionInx < constituencyAndList.length; regionInx++) { // for each region..
+    for (partyInx = 0; partyInx < parties.length; partyInx++) { // and each party's vote
       workingListVotes[regionInx][partyInx] = constituencyAndList[regionInx].listVotes[partyInx]; // copy list votes to an array that can be safely altered
     }
     if (currentDataset === 1) { // i.e. the 50/50 scenario where SNP votes are shared out between Alba and Green parties
-      temp = workingListVotes[regionInx][0]/2;
-      workingListVotes[regionInx][0] = 0;
-      workingListVotes[regionInx][1] += Math.floor(temp);
-      workingListVotes[regionInx][2] += Math.ceil(temp);
-      document.getElementById("dataset").innerHTML = "Alba/Green 50/50"
+      temp = workingListVotes[regionInx][0]/2; // divide SNP by 2 and save for later
+      workingListVotes[regionInx][0] = 0; // SNP votes to zero. They will be shared out evenly and given to..
+      workingListVotes[regionInx][1] += Math.floor(temp); // the Alba pro-independence party..
+      workingListVotes[regionInx][2] += Math.ceil(temp); // and the Grens who are also pro-indy
+      document.getElementById("dataset").innerHTML = "Alba/Green 50/50" // change the text for the data set button
     } else document.getElementById("dataset").innerHTML = "2021 results";
   }
   dHondtReset();
